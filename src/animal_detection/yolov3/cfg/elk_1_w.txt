@@ -1,0 +1,6 @@
+classes=8
+train=/local1/emazuh/elk/yolo/yolov3/data/animals/output/elk_1_w.txt
+valid=/local1/emazuh/elk/yolo/yolov3/data/animals/output/elk_1_w.txt
+names=../labelling_tool/data/classes.txt
+backup=/local1/emazuh/elk/yolo/yolov3/data/animals/output/backup/
+eval=coco

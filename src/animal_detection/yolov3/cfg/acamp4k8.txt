@@ -1,0 +1,6 @@
+classes=8
+train=/local1/emazuh/elk/yolo/yolov3/data/animals/output/acamp4k8_train.txt
+valid=/local1/emazuh/elk/yolo/yolov3/data/animals/output/acamp4k8_val_inv.txt
+names=../labelling_tool/data/predefined_classes_4k8.txt
+backup=backup/
+eval=coco

@@ -1,0 +1,6 @@
+deer/deer_jesse_static_2
+deer/deer_static_adobe_1
+coyote/coyote_jesse_static_2_1
+coyote/coyote_jesse_static_3
+coyote/coyote_jesse_static_4
+bear/bear_jesse_static_1_1
