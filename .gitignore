@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# build output from mock-eye-module
+src/mock-eye-module/tmp/
