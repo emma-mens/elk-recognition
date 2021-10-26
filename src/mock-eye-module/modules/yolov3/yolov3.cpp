@@ -19,6 +19,7 @@
 
 // Our includes
 #include "../../kernels/utils.hpp"
+#include "../../kernels/yolov3.hpp"
 #include "../device.hpp"
 #include "../parser.hpp"
 #include "yolov3.hpp"
@@ -52,7 +53,9 @@ void compile_and_run(const std::string &video_fpath, const std::string &modelfpa
 
     // This is the only thing we are doing so far: copying the input to the output.
     auto raw_input = cv::gapi::copy(in);
-    auto graph_outs = cv::GOut(raw_input);
+    auto nn = cv::gapi::infer<ElkYoloV3>(in);
+    auto parsed_nn = cv::gapi::custom::parse_yolov3(nn);
+    auto graph_outs = cv::GOut(raw_input, parsed_nn);
 
 
     // Graph compilation ///////////////////////////////////////////////////////
@@ -60,9 +63,11 @@ void compile_and_run(const std::string &video_fpath, const std::string &modelfpa
     // Set up the inputs and outpus of the graph.
     auto comp = cv::GComputation(cv::GIn(in), std::move(graph_outs));
 
+    auto kernels = cv::gapi::kernels<cv::gapi::custom::GOCVParseYoloV3>();
+
     // Now compile the graph into a pipeline object that we will use as
     // an abstract black box that takes in images and outputs images.
-    auto compiled_args = cv::compile_args(cv::gapi::networks(network));
+    auto compiled_args = cv::compile_args(kernels, cv::gapi::networks(network));
     auto pipeline = comp.compileStreaming(std::move(compiled_args));
 
 
@@ -96,7 +101,8 @@ void compile_and_run(const std::string &video_fpath, const std::string &modelfpa
     //
     // We'll just use synchronous mode here and we'll discuss asynchronous mode later when we port to the device.
     cv::Mat out_raw_mat;
-    auto pipeline_outputs = cv::gout(out_raw_mat);
+    cv::Mat out_nn;
+    auto pipeline_outputs = cv::gout(out_raw_mat, out_nn);
 
     // Pull the information through the compiled graph, filling our output nodes at each iteration.
     while (pipeline.pull(std::move(pipeline_outputs)))
@@ -105,6 +111,19 @@ void compile_and_run(const std::string &video_fpath, const std::string &modelfpa
         {
             cv::imshow("Out", out_raw_mat);
             cv::waitKey(1);
+
+	    // Now let's print our network's output dimensions
+            // If you have been following along so far, these dimensions should be {1, 5, 256, 256}
+            std::cout << " Dimensions: ";
+            for (auto i = 0; i < out_nn.size.dims(); i++)
+            {
+                std::cout << std::to_string(out_nn.size[i]);
+                if (i != (out_nn.size.dims() - 1))
+                {
+                    std::cout << ", ";
+                }
+            }
+            std::cout << std::endl;
         }
     }
 }
