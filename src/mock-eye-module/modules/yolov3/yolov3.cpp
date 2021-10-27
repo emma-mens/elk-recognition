@@ -19,7 +19,7 @@
 
 // Our includes
 #include "../../kernels/utils.hpp"
-#include "../../kernels/yolov3.hpp"
+#include "../../kernels/yolov3_kernel.hpp"
 #include "../device.hpp"
 #include "../parser.hpp"
 #include "yolov3.hpp"
@@ -54,8 +54,10 @@ void compile_and_run(const std::string &video_fpath, const std::string &modelfpa
     // This is the only thing we are doing so far: copying the input to the output.
     auto raw_input = cv::gapi::copy(in);
     auto nn = cv::gapi::infer<ElkYoloV3>(in);
-    auto parsed_nn = cv::gapi::custom::parse_yolov3(nn);
-    auto graph_outs = cv::GOut(raw_input, parsed_nn);
+    cv::GMat parsed_nn;
+    cv::GArray<float> predictions;
+    std::tie(parsed_nn, predictions) = cv::gapi::custom::parse_yolov3(nn);
+    auto graph_outs = cv::GOut(raw_input, parsed_nn, predictions);
 
 
     // Graph compilation ///////////////////////////////////////////////////////
@@ -102,7 +104,8 @@ void compile_and_run(const std::string &video_fpath, const std::string &modelfpa
     // We'll just use synchronous mode here and we'll discuss asynchronous mode later when we port to the device.
     cv::Mat out_raw_mat;
     cv::Mat out_nn;
-    auto pipeline_outputs = cv::gout(out_raw_mat, out_nn);
+    std::vector<float> out_predictions;
+    auto pipeline_outputs = cv::gout(out_raw_mat, out_nn, out_predictions);
 
     // Pull the information through the compiled graph, filling our output nodes at each iteration.
     while (pipeline.pull(std::move(pipeline_outputs)))
@@ -112,21 +115,21 @@ void compile_and_run(const std::string &video_fpath, const std::string &modelfpa
             cv::imshow("Out", out_raw_mat);
             cv::waitKey(1);
 
-	    // Now let's print our network's output dimensions
-            // If you have been following along so far, these dimensions should be {1, 5, 256, 256}
-            std::cout << " Dimensions: ";
-            for (auto i = 0; i < out_nn.size.dims(); i++)
-            {
-                std::cout << std::to_string(out_nn.size[i]);
-                if (i != (out_nn.size.dims() - 1))
-                {
-                    std::cout << ", ";
-                }
+	    // Instead of printing the dimensions now, let's print the coverages.
+            // std::cout << " Detections: ";
+            // for (auto i = 0; (unsigned)i < out_predictions.size(); i++)
+            // {
+            if (out_predictions.at(1) > -1) {
+		    // obj detected
+                    std::cout << " Detections: " << labels.at(static_cast<int>(out_predictions.at(0))) << " conf: " << out_predictions.at(1) << std::endl;
+                   // if ((unsigned)i != (out_predictions.size() - 1))
+                   // {
+                   //     std::cout << ", ";
+                   // }
             }
-            std::cout << std::endl;
+            // std::cout << std::endl;
         }
     }
 }
-
 } // namespace elk_yolov3
 
