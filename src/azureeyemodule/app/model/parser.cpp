@@ -57,7 +57,12 @@ Parser from_string(const std::string &parser_str)
     else if (parser_str == "faster-rcnn-resnet50")
     {
         return Parser::FASTER_RCNN_RESNET50;
-    }
+    } 
+    else if (parser_str == "elk-yolov3")
+    {
+        return Parser::ELK_YOLOV3;
+    }  
+
     else
     {
         std::cerr << "Given " << parser_str << " for --parser, but we do not support it." << std::endl;
@@ -93,6 +98,8 @@ std::string to_string(const Parser &p)
             return "unet";
         case Parser::FASTER_RCNN_RESNET50:
             return "faster-rcnn-resnet50";
+	case Parser::ELK_YOLOV3:
+	    return "elk-yolov3";
         default:
             std::cerr << "Can't convert this type of parser to a string." << std::endl;
             exit(__LINE__);

@@ -18,7 +18,8 @@ enum class Parser {
     SSD100,
     SSD200,
     UNET,
-    YOLO
+    YOLO,
+    ELK_YOLOV3
 };
 
 /**

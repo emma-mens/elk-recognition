@@ -31,6 +31,7 @@
 #include "model/s1.hpp"
 #include "model/ssd.hpp"
 #include "model/yolo.hpp"
+#include "model/elk_yolov3.hpp"
 #include "model/onnxssd.hpp"
 #include "secure_ai/secureai.hpp"
 #include "streaming/rtsp.hpp"
@@ -171,6 +172,9 @@ static void determine_model_type(const std::string &labelfile, const std::vector
             break;
         case model::parser::Parser::FASTER_RCNN_RESNET50:
             the_model = new model::FasterRCNNModel(labelfile, modelfiles, mvcmd, videofile, resolution);
+            break;
+	case model::parser::Parser::ELK_YOLOV3:                                                           //// << NEW
+            the_model = new model::ElkYoloV3(modelfiles, mvcmd, videofile, resolution); //// << NEW
             break;
         default:
             util::log_error("No parser for the given model type: " + model::parser::to_string(parser_type));
