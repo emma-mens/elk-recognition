@@ -208,13 +208,15 @@ cv::GStreamingCompiled SSDModel::compile_cv_graph_uvc_video() const
         {
             util::log_error("The video file doesn't exist.");
         }
-        pipeline.setSource<cv::gapi::wip::GCaptureSource>(video_file_path);
+        // pipeline.setSource<cv::gapi::wip::GCaptureSource>(video_file_path);
+        pipeline.setSource(cv::gapi::wip::make_src<cv::gapi::mx::Camera>());
     } 
     //else continue as uvc camera, video0 as default value
     else 
     {
         util::log_info("Input source is a uvc camera (video0 as default value)");
-        pipeline.setSource<cv::gapi::wip::GCaptureSource>(0);
+        // pipeline.setSource<cv::gapi::wip::GCaptureSource>(0);
+        pipeline.setSource(cv::gapi::wip::make_src<cv::gapi::mx::Camera>());
     }
 
     return pipeline;

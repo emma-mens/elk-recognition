@@ -84,7 +84,7 @@ void ElkYoloV3Model::log_parameters() const
         msg += blob + ", ";
     }
     msg.append(", firmware: " + this->mvcmd);
-    msg.append(", parser: UnetSemanticSegmentationModel");
+    msg.append(", parser: ElkYoloV3Model");
     msg.append(", label: " + this->labelfpath);
     msg.append(", classes: {");
     for (const auto &label : this->class_labels)
@@ -160,7 +160,7 @@ cv::GStreamingCompiled ElkYoloV3Model::compile_cv_graph() const
                                            nn_seqno, nn_ts, parsed_nn, predictions));   // desynchronized path: Inferences and post-processing
 
     // Pass the network .blob file in (instead of an OpenVINO IR .xml and .bin file)
-    auto networks = cv::gapi::networks(cv::gapi::mx::Params<ElkYoloV3Model>{ this->modelfiles.at(0) });
+    auto networks = cv::gapi::networks(cv::gapi::mx::Params<ElkYoloV3>{ this->modelfiles.at(0) });
 
     // Create the kernels. Notice that we need some custom kernels for the Myriad X, which we get
     // by calling cv::gapi::mx::kernels().
@@ -248,7 +248,7 @@ bool ElkYoloV3Model::pull_data(cv::GStreamingCompiled &pipeline)
     return true;
 }
 
-void UnetSemanticSegmentationModel::handle_inference_output(const cv::optional<cv::Mat> &out_nn, const cv::optional<int64_t> &out_nn_ts,
+void ElkYoloV3Model::handle_inference_output(const cv::optional<cv::Mat> &out_nn, const cv::optional<int64_t> &out_nn_ts,
                                                             const cv::optional<int64_t> &out_nn_seqno, const cv::optional<std::vector<float>> &out_predictions,
                                                             const cv::Size &size,
                                                             cv::Mat &last_nn, std::vector<float> last_predictions)
@@ -315,7 +315,7 @@ void UnetSemanticSegmentationModel::handle_inference_output(const cv::optional<c
     iot::msgs::send_message(iot::msgs::MsgChannel::NEURAL_NETWORK, msg);
 }
 
-void UnetSemanticSegmentationModel::handle_bgr_output(cv::optional<cv::Mat> &out_raw_mat, cv::Mat &last_raw_mat, const cv::Mat &last_nn)
+void ElkYoloV3Model::handle_bgr_output(cv::optional<cv::Mat> &out_raw_mat, cv::Mat &last_raw_mat, const cv::Mat &last_nn)
 {
     // Just like in the handle_inference_output method, we need to make sure
     // that the branch of the G-API graph we are dealing with actually had outputs
