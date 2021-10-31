@@ -345,7 +345,8 @@ void ElkYoloV3Model::handle_bgr_output(cv::optional<cv::Mat> &out_raw_mat, cv::M
     // try to compose a result image if we have something useful in last_nn)
     if (last_nn.size() == result_mat.size())
     {
-        result_mat = (last_raw_mat / 2) + (last_nn / 2);
+        // result_mat = (last_raw_mat / 2) + (last_nn / 2);
+        result_mat = last_raw_mat;
     }
 
     // If we have a status message for the user, we display
