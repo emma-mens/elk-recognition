@@ -10,6 +10,7 @@ def reformat_filename(f):
     "reformat file name to make blob subdirectory organized by date"
     device, date, time = f.split('.mp4')[0].split('_')
     date = date.replace("-", "/")
+    time = "-".join(time.split("-")[:2]) # only use hour-minute resolution
     return date + "/" + device + "_" + time + ".mp4"
 
 # Get all outstanding mp4 files
