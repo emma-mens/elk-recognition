@@ -20,6 +20,10 @@ import org.pytorch.torchvision.TensorImageUtils;
 
 import java.io.File;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Queue;
@@ -205,6 +209,55 @@ public class ImageClassificationActivity extends AbstractCameraXActivity<ImageCl
       return null;
     }
   }
+
+  private ArrayList<Double> getMaxForRow(ArrayList<Double> array, Integer oClass, Double oConf) {
+    Double best = -1.0;
+    Integer bestPos = -1;
+    int start = 5;
+    // for yolov3 class predictions start at column 5
+    for (int i = start; i < array.size(); i++) {
+      if (array.get(i) > best) {
+        best = array.get(i);
+        bestPos = i - start;
+      }
+    }
+    return(ArrayList<Double>) Arrays.asList(bestPos.doubleValue(), best);
+  }
+
+  private Boolean isFinite(ArrayList<Double> arr) {
+    for (int i = 1; i < arr.size(); i++) {
+      if (arr.get(i) < Double.POSITIVE_INFINITY) return false;
+    }
+    return true;
+  }
+
+  private ArrayList<Double> getBestPrediction(ArrayList<ArrayList<Double>> mat, ArrayList<Double> pred, Integer minHW, Double confThresh) {
+    Integer bestClass = -1;
+    Double bestConf = -1.0;
+    Integer objClass = -1;
+    Double objConf = -1.0;
+    Double x, y;
+    int N = mat.size();
+    ArrayList<Double> currArray;
+    for (int i = 0; i < N; i++) {
+      currArray = mat.get(i);
+      getMaxForRow(currArray, objClass, objConf);
+      objConf *= currArray.get(4); // for yolov3 column 4 is the confidence that current bounding box contains an object
+      // multiply to with conditional confidence that object is the given class for final probability
+      x = currArray.get(2);
+      y = currArray.get(3);
+
+      if (x > minHW && y > minHW && objConf > confThresh && isFinite(currArray)) {
+        // this is a candidate prediction
+        if (objConf > bestConf) {
+          bestConf = objConf;
+          bestClass = objClass;
+        }
+      }
+    }
+    return(ArrayList<Double>) Arrays.asList(bestClass.doubleValue(), bestConf);
+  }
+
 
   @Override
   protected int getInfoViewCode() {
