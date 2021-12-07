@@ -130,3 +130,9 @@ dmypy.json
 
 # build output from mock-eye-module
 src/mock-eye-module/tmp/
+
+# DSTORE
+*.DS_Store
+
+# Vid files
+*.mp4

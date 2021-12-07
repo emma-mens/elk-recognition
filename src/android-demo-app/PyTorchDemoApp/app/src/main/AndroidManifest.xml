@@ -11,6 +11,7 @@
         android:theme="@style/AppTheme.NoActionBar">
         <activity
             android:name=".WelcomeActivity"
+            android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,6 +24,7 @@
         <activity android:name=".nlp.NLPListActivity" />
         <activity
             android:name=".vision.ImageClassificationActivity"
+            android:exported="true"
             android:label="@string/image_classification_title"></activity>
         <activity android:name=".nlp.TextClassificationActivity" />
 
