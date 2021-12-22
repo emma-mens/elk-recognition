@@ -156,7 +156,8 @@ def train(
                                   batch_size,
                                   augment=True,
                                   rect=False,
-                                  multi_scale=multi_scale)
+                                  multi_scale=multi_scale,
+                                  elk_vs_all=params.elk_vall)
 
     # Initialize distributed training
     if torch.cuda.device_count() > 1:
@@ -228,8 +229,9 @@ def train(
             targets = targets.to(device)
 
             # Plot images with bounding boxes
-            if epoch == 0 and i == 0:
-                plot_images(imgs=imgs, targets=targets, fname='train_batch0.jpg')
+            # TODO uncomment to allow plotting
+#             if epoch == 0 and i == 0:
+#                 plot_images(imgs=imgs, targets=targets, fname='train_batch0.jpg')
 
             # SGD burn-in
             if epoch == 0 and i <= n_burnin:
@@ -297,6 +299,7 @@ def train(
                     model=model,
                     conf_thres=0.1,
                     load_sep=load_sep,
+                    elk_vall=params.elk_vall
                 )
 
             test_mp, test_mr, test_map, test_mf1, test_mloss = results

@@ -20,6 +20,7 @@ def test(
         save_json=False,
         model=None,
         load_sep=' ',
+        elk_vall=False,
 ):
     if model is None:
         device = torch_utils.select_device()
@@ -43,9 +44,15 @@ def test(
     nc = int(data_cfg['classes'])  # number of classes
     test_path = data_cfg['valid']  # path to test images
     names = load_classes(data_cfg['names'])  # class names
+    
+    if elk_vall:
+        nc = 2
+        names = ['no_elk', 'elk']
 
     # Dataloader
-    dataset = LoadImagesAndLabels(test_path, img_size, batch_size, sep=load_sep)
+    print('elk_vs_all', elk_vall)
+    dataset = LoadImagesAndLabels(test_path, img_size, batch_size, sep=load_sep, elk_vs_all=elk_vall)
+    print('test size', len(dataset))
     dataloader = DataLoader(dataset,
                             batch_size=batch_size,
                             num_workers=4,
@@ -64,14 +71,16 @@ def test(
         _, _, height, width = imgs.shape  # batch size, channels, height, width
 
         # Plot images with bounding boxes
-        if batch_i == 0 and not os.path.exists('test_batch0.jpg'):
-            plot_images(imgs=imgs, targets=targets, fname='test_batch0.jpg')
+        # TODO remove to allow plotting
+#         if batch_i == 0 and not os.path.exists('test_batch0.jpg'):
+#             plot_images(imgs=imgs, targets=targets, fname='test_batch0.jpg')
 
         # Run model
         inf_out, train_out = model(imgs)  # inference and training outputs
 
         # Compute loss
         if hasattr(model, 'hyp'):  # if model has loss hyperparameters
+#             print('train_out', train_out[0].shape, train_out[1].shape, 'targets', targets[0].shape)
             loss_i, _ = compute_loss(train_out, targets, model)
             loss += loss_i.item()
 
@@ -193,6 +202,7 @@ if __name__ == '__main__':
     parser.add_argument('--conf-thres', type=float, default=0.001, help='object confidence threshold')
     parser.add_argument('--nms-thres', type=float, default=0.5, help='iou threshold for non-maximum suppression')
     parser.add_argument('--save-json', action='store_true', help='save a cocoapi-compatible JSON results file')
+    parser.add_argument('--elk-vall', action='store_true', help='binary classification elk or not')
     parser.add_argument('--img-size', type=int, default=416, help='inference size (pixels)')
     opt = parser.parse_args()
     print(opt)
@@ -207,5 +217,6 @@ if __name__ == '__main__':
             opt.iou_thres,
             opt.conf_thres,
             opt.nms_thres,
-            opt.save_json
+            opt.save_json,
+            opt.elk_vall
         )

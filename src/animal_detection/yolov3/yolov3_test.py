@@ -151,7 +151,8 @@ def test(opt, model=None):
     names = load_classes(data_cfg['names'])  # class names
 
     # Dataloader
-    dataset = LoadImagesAndLabels(opt.test_path, opt.img_size, opt.batch_size, rect=False, sort_files=True)
+    dataset = LoadImagesAndLabels(opt.test_path, opt.img_size, opt.batch_size, rect=False, 
+                                  sort_files=True, elk_vs_all=opt.elk_vall)
     dataloader = DataLoader(dataset,
                             batch_size=opt.batch_size,
                             num_workers=4,

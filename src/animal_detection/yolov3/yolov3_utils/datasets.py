@@ -132,7 +132,7 @@ class LoadWebcam:  # for inference
 class LoadImagesAndLabels(Dataset):  # for training/testing
     def __init__(self, path, img_size=416, batch_size=16,
                  augment=False, rect=True, image_weights=False,
-                 multi_scale=False, sort_files=False, sep=' '):
+                 multi_scale=False, sort_files=False, sep=' ', elk_vs_all=False):
         print('Reading annotations from {}'.format(path))
         with open(path, 'r') as f:
             img_files = f.read().splitlines()
@@ -168,6 +168,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         self.augment = augment
         self.image_weights = image_weights
         self.rect = False if image_weights else rect
+        self.elk_vs_all = elk_vs_all
 
 
 
@@ -306,6 +307,10 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         # with open(label_path, 'r') as f:
         #     x = np.array([x.split() for x in f.read().splitlines()], dtype=np.float32)
         x = self.labels[index]
+        
+        if self.elk_vs_all:
+            elk_label = 5
+            x[:,0] = (x[:,0] == elk_label) + 0 # 1 if label is elk label else 0
         if x.size > 0:
             # Normalized xywh to pixel xyxy format
             labels = x.copy()
@@ -345,6 +350,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         labels_out = torch.zeros((nL, 6))
         if nL:
             labels_out[:, 1:] = torch.from_numpy(labels)
+        # TODO fix the labels_out here to be 2
 
         # Normalize
         img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
@@ -373,13 +379,13 @@ def letterbox(img, new_shape=416, color=(127.5, 127.5, 127.5), mode='auto'):
     new_unpad = (int(round(shape[1] * ratio)), int(round(shape[0] * ratio)))
 
     # Compute padding https://github.com/ultralytics/yolov3/issues/232
-    if mode is 'auto':  # minimum rectangle
+    if mode == 'auto':  # minimum rectangle
         dw = np.mod(new_shape - new_unpad[0], 32) / 2  # width padding
         dh = np.mod(new_shape - new_unpad[1], 32) / 2  # height padding
-    elif mode is 'square':  # square
+    elif mode == 'square':  # square
         dw = (new_shape - new_unpad[0]) / 2  # width padding
         dh = (new_shape - new_unpad[1]) / 2  # height padding
-    elif mode is 'rect':  # square
+    elif mode == 'rect':  # square
         dw = (new_shape[1] - new_unpad[0]) / 2  # width padding
         dh = (new_shape[0] - new_unpad[1]) / 2  # height padding
 

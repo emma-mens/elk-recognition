@@ -133,6 +133,7 @@ class YOLOv3TrainParams:
         self.hyp = HyperParams()
         self.world_size = 1
         self.load_sep = ' '
+        self.elk_vall = False
         self.help = {
             'accumulate': 'accumulate gradient x batches before optimizing',
             'backend': 'distributed backend',
@@ -155,5 +156,6 @@ class YOLOv3TrainParams:
             'var': 'debug variable',
             'weights': 'weights path',
             'world_size': 'number of nodes for distributed training',
+            'elk_vall': 'binary classification elk or not',
             'hyp': 'HyperParams',
         }

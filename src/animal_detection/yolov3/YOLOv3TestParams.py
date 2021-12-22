@@ -44,6 +44,7 @@ class YOLOv3TestParams:
         self.max_trackers = 0
         self.vis = 0
         self.verbose = 0
+        self.elk_vall = False
         self.weights = 'weights/yolov3-spp.weights'
 
         # self.siam_fc = SiamFCParams()
@@ -62,6 +63,7 @@ class YOLOv3TestParams:
             'out_suffix': 'out_suffix',
             'save_dir': 'save_dir path',
             'test_path': 'test_path',
+            'elk_vall': 'binary classification elk or not',
             'track_diff': 'minimum frame difference between creating two trackers',
             'track_thresh': 'tracking confidence threshold',
             'tracker_type': {
