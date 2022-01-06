@@ -3,7 +3,6 @@ from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, _
 connect_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 
 
-RPI_CONTAINER_NAME = "rpi"
 STREAM_DIR = "/home/pi/Videos/elk-project/"
 
 def reformat_filename(f):
@@ -11,7 +10,7 @@ def reformat_filename(f):
     device, date, time = f.split('.mp4')[0].split('_')
     date = date.replace("-", "/")
     time = "-".join(time.split("-")[:2]) # only use hour-minute resolution
-    return date + "/" + device + "_" + time + ".mp4"
+    return device, date + "/" + device + "_" + time + ".mp4"
 
 # Get all outstanding mp4 files
 files_to_upload = list(filter(lambda x: "mp4" in x, os.listdir(STREAM_DIR)))
@@ -29,11 +28,14 @@ except Exception as ex:
 for local_file_name in files_to_upload:
     try:
         upload_file_path = os.path.join(STREAM_DIR, local_file_name)
-        blob_client = blob_service_client.get_blob_client(container=RPI_CONTAINER_NAME, blob=reformat_filename(local_file_name))    
+        device_name, blob_name = reformat_filename(local_file_name)
+        blob_client = blob_service_client.get_blob_client(container=device_name, blob=blob_name)    
 
         print("\nUploading to Azure Storage as blob:\n\t" + local_file_name)
+        with open('/home/pi/gitdir/elk-recognition/src/utils/test.txt', 'a') as lf:
+            lf.write(local_file_name)
         
-        # Upload the created file
+        # Upload the video file
         with open(upload_file_path, "rb") as data:
             blob_client.upload_blob(data)
 
