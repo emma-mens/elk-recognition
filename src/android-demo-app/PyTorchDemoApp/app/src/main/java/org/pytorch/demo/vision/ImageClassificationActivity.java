@@ -159,21 +159,26 @@ public class ImageClassificationActivity extends AbstractCameraXActivity<ImageCl
   @WorkerThread
   @Nullable
   protected AnalysisResult analyzeImage(ImageProxy image, int rotationDegrees) {
+    Log.e("Debug module", " Begin analyze");
     if (mAnalyzeImageErrorState) {
       return null;
     }
 
+    Log.e("Debug module", " Trying to load module");
     try {
       if (mModule == null) {
         final String moduleFileAbsoluteFilePath = new File(
             Utils.assetFilePath(this, getModuleAssetName())).getAbsolutePath();
+        Log.e("Debug module", " module path " + moduleFileAbsoluteFilePath);
         mModule = Module.load(moduleFileAbsoluteFilePath);
+        Log.e("Debug module", " module " + mModule);
 
         mInputTensorBuffer =
             Tensor.allocateFloatBuffer(3 * INPUT_TENSOR_WIDTH * INPUT_TENSOR_HEIGHT);
         mInputTensor = Tensor.fromBlob(mInputTensorBuffer, new long[]{1, 3, INPUT_TENSOR_HEIGHT, INPUT_TENSOR_WIDTH});
       }
 
+      Log.e("Debug module", " Loaded module; getting image");
       final long startTime = SystemClock.elapsedRealtime();
       TensorImageUtils.imageYUV420CenterCropToFloatBuffer(
           image.getImage(), rotationDegrees,
@@ -183,7 +188,9 @@ public class ImageClassificationActivity extends AbstractCameraXActivity<ImageCl
           mInputTensorBuffer, 0);
 
       final long moduleForwardStartTime = SystemClock.elapsedRealtime();
+      Log.e("Debug module", " Before inference: input tensor shape " + mInputTensor.shape());
       final Tensor outputTensor = mModule.forward(IValue.from(mInputTensor)).toTensor();
+      Log.e("Debug module", " After inference");
       final long moduleForwardDuration = SystemClock.elapsedRealtime() - moduleForwardStartTime;
 
       final float[] scores = outputTensor.getDataAsFloatArray();
@@ -200,6 +207,7 @@ public class ImageClassificationActivity extends AbstractCameraXActivity<ImageCl
       return new AnalysisResult(topKClassNames, topKScores, moduleForwardDuration, analysisDuration);
     } catch (Exception e) {
       Log.e(Constants.TAG, "Error during image analysis", e);
+      Log.e("Debug module", "Error during image analysis", e);
       mAnalyzeImageErrorState = true;
       runOnUiThread(() -> {
         if (!isFinishing()) {

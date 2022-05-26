@@ -41,7 +41,7 @@ public abstract class AbstractCameraXActivity<R> extends BaseModuleActivity {
 
   private long mLastAnalysisResultTime;
   @SuppressLint("SimpleDateFormat")
-  private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH_mm");
+  private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm");
 
   protected abstract int getContentViewLayoutId();
 
@@ -166,7 +166,7 @@ public abstract class AbstractCameraXActivity<R> extends BaseModuleActivity {
   }
 
   private File getTimestampedFileName() {
-    // filePath = /storage/emulated/0/Android/data/org.pytorch.demo/files/android_YYYY_MM_DD_H_M.mp4
+    // filePath = /storage/emulated/0/Android/data/org.pytorch.demo/files/android_YYYY-MM-DD_H-M.mp4
     File file = new File(this.getExternalFilesDir(null),
             "/android_" + dateFormat.format(Calendar.getInstance().getTime()) + ".mp4");
     file.getParentFile().mkdirs();
