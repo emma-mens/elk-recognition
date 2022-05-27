@@ -7,13 +7,14 @@ STREAM_DIR = "/home/pi/Videos/elk-project/"
 
 def reformat_filename(f):
     "reformat file name to make blob subdirectory organized by date"
-    device, date, time = f.split('.mp4')[0].split('_')
+    fmt = '.mp4' if 'mp4' in f else '.jpg' 
+    device, date, time = f.split(fmt)[0].split('_')
     date = date.replace("-", "/")
     time = "-".join(time.split("-")[:2]) # only use hour-minute resolution
-    return device, date + "/" + device + "_" + time + ".mp4"
+    return device, date + "/" + device + "_" + time + fmt
 
 # Get all outstanding mp4 files
-files_to_upload = list(filter(lambda x: "mp4" in x, os.listdir(STREAM_DIR)))
+files_to_upload = list(filter(lambda x: "mp4" in x or "jpg" in x, os.listdir(STREAM_DIR)))
 
 try:
     # Create the BlobServiceClient object which will be used to create a container client
@@ -41,9 +42,7 @@ for local_file_name in files_to_upload:
 
         # upload successful. delete local file
         os.remove(upload_file_path)
-
     except Exception as ex:
         print('Exception:')
         print(ex)
         # Skip.. try again next round to upload file
-
